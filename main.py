@@ -20,7 +20,7 @@ import random
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
 ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
 values = {'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8,
-          'Nine': 9, 'Ten': 10, 'Jack': 10, 'Queen': 10, 'King': 10, 'Ace_one': 1, 'Ace_eleven': 11}
+          'Nine': 9, 'Ten': 10, 'Jack': 10, 'Queen': 10, 'King': 10, 'Ace': 11}
 chip_colors = {1: 'Red', 5: 'Blue', 10: 'Green', 20: 'Black', 50: 'White'}
 
 
@@ -87,25 +87,47 @@ class Hand:
             str_hand.append(str(card))
         return str_hand
 
+    def value(self):
+        # Find total points value for hand
+        total = 0
+        has_ace = False
+        for card in self.cards:
+            if card.rank == 'Ace':  # Determine if player has Ace in their hand
+                if total + 11 > 21:
+                    total += 1
+                    has_ace = True
+                else:
+                    total += 11
+                    has_ace = True
+            else:
+                total += card.value
+        if total > 21 and has_ace:
+            return total - 10
+        else:
+            return total
+
 
 class Player:
     # Player has bankroll and hand, and bankroll has a total value equal to adding up all chips
     def __init__(self):
         self.bankroll = []
-        self.total_value = len(self.bankroll)
+        self.total_cash = len(self.bankroll)
         self.hand = Hand()
         # Give the player 20 chips to play with
-        while self.total_value < 20:
+        while self.total_cash < 20:
             self.bankroll.append(Chip(1))
 
     def __str__(self):
-        return f'Money remaining: {self.total_value}'
+        return f'Money remaining: {self.total_cash}'
 
     def deal_cards(self, cards):
         if type(cards) == type([]):
             self.hand.extend(cards)
         else:
             self.hand.append(cards)
+
+    def bet_chip(self):
+        return self.bankroll.pop(0)
 
 
 class Pot:
@@ -119,6 +141,11 @@ class Pot:
 
     def __str__(self):
         return f'The value of the pot is: {self.value}'
+
+    def bet(self, number):
+
+        for i in range(number):
+            self.chips.append(player.bet_chip())
 
 
 # Set up game
@@ -140,10 +167,32 @@ def deal_cards():
     print(f'You have {player.hand.print_hand()}')
 
 
+def player_turn():
+    # Player decides to hit or stay
+    action = input("Would you like to hit or stay? ")
+    if action.lower() not in ['hit', 'stay']:
+        print("Invalid input. Please type either 'hit' or 'stay'")
+    else:
+        return action
+
+
 while game_on:
 
-    if player.total_value > 0:
-        pass
+    if player.total_cash > 0:  # Make sure a player has enough money to bet
+        bet = int(input("Please enter how many chips you would like to bet: "))
+        if bet < player.total_cash:
+            pot.bet(bet)
+        else:
+            print("You don't have enough chips for that bet! Please only bet money you have.")
+
+    while player.hand.value() < 21:
+        deal_cards()
+        if player_turn() == 'stay':
+            print(f'You stay. Hand value: {player.hand.value()}')
+            break
+
+
+
     else:
         print('Player is out of money! Game over.')
         game_on = False
