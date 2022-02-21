@@ -14,6 +14,7 @@ Rules:
     1. Face cards count as value of 10
     2. Aces can be either 1 or 11, whichever is preferable to the player
 """
+import random
 
 # Define card attributes and values
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
@@ -44,19 +45,9 @@ class Deck:
 
         return self.all_cards.pop(0)
 
+    def shuffle(self):
 
-class Player:
-    # Player has bankroll and hand, and bankroll has a total value equal to adding up all chips
-    def __init__(self):
-        self.bankroll = []
-        self.total_value = len(self.bankroll)
-        self.hand = []
-        # Give the player 20 chips to play with
-        while self.total_value < 20:
-            self.bankroll.append(Chip(1))
-
-    def __str__(self):
-        return f'Money remaining: {self.total_value}'
+        return random.shuffle(self.all_cards)
 
 
 class Chip:
@@ -76,5 +67,26 @@ class Hand:
 
     def __str__(self):
         return f'The current cards in your hand are: {self.cards}'
+
+
+class Player:
+    # Player has bankroll and hand, and bankroll has a total value equal to adding up all chips
+    def __init__(self):
+        self.bankroll = []
+        self.total_value = len(self.bankroll)
+        self.hand = Hand()
+        # Give the player 20 chips to play with
+        while self.total_value < 20:
+            self.bankroll.append(Chip(1))
+
+    def __str__(self):
+        return f'Money remaining: {self.total_value}'
+
+
+# Set up game
+game_on = True
+main_deck = Deck()
+main_deck.shuffle()
+player = Player()
 
 
