@@ -81,6 +81,8 @@ class Chip:
 
 class Hand:
 
+    total = 0
+
     def __init__(self):
         self.cards = []
 
@@ -95,22 +97,22 @@ class Hand:
 
     def value(self):
         # Find total points value for hand
-        total = 0
+        self.total = 0
         has_ace = False
         for card in self.cards:
             if card.rank == 'Ace':  # Determine if player has Ace in their hand
-                if total + 11 > 21:
-                    total += 1
+                if self.total + 11 > 21:
+                    self.total += 1
                     has_ace = True
                 else:
-                    total += 11
+                    self.total += 11
                     has_ace = True
             else:
-                total += card.value
-        if total > 21 and has_ace:
-            return total - 10
+                self.total += card.value
+        if self.total > 21 and has_ace:
+            return self.total - 10
         else:
-            return total
+            return self.total
 
     def add_cards(self, cards):
         if type(cards) == type([]):
@@ -153,8 +155,10 @@ class Pot:
         else:
             self.chips.append(chip)
 
-    def payout(self):
-        return self.chips
+    def payout(self):  # Empty the pot and pay the player
+        _payout = self.chips
+        self.chips = []
+        return _payout
 
     def value(self):
         total = 0
@@ -183,7 +187,7 @@ def deal_cards():
     dealer.deal_cards([main_deck.remove_card(), main_deck.remove_card().flip])
     # Print the cards on the field for the player
     print(f'The dealer is showing {str(dealer.hand.cards[0])}')
-    print(f'You have {player.hand.print_hand()}')
+    print(f'You have {player.hand.print_hand()} worth {player.hand.value()}')
 
 
 def player_turn():
@@ -203,6 +207,7 @@ def play_again():
         if action.upper() == 'Y':
             return True
         elif action.upper() == 'N':
+            print(f"Thank you for playing! You ended with {len(player.bankroll)} chips.")
             return False
         else:
             print('Invalid input. Please enter only "Y" or "N"')
@@ -232,19 +237,26 @@ while game_on:
     # Deal initial hand
     deal_cards()
 
+    if player.hand.value == 21 and dealer.hand.value != 21:
+        print(f'Player {player.hand.value()} beats Dealer {dealer.hand.value()}. Player wins!')
+        player.bankroll.extend(pot.payout())
+        game_on = play_again()
+
     while player.hand.value() < 21:
         player_hit = player_turn()
         if player_hit == 'stay':
             print(f'You stay. Hand value: {player.hand.value()}')
             dealer_turn = True
             break
-        elif player_hit == 'hit:':
-            player.deal_cards(main_deck.remove_card())
-            print(f'You hit! Hand value: {player.hand.value()}')
-            if player.hand.value() < 21:
+        elif player_hit == 'hit':
+            hit_card = main_deck.remove_card()
+            player.deal_cards(hit_card)
+            print(f"You hit! It's the {hit_card} Hand value: {player.hand.value()}")
+            if player.hand.value() <= 21:
                 continue
             else:
                 print('Bust! You lose')
+                pot.empty()
                 game_on = play_again()
                 break
 
