@@ -26,11 +26,12 @@ chip_colors = {1: 'Red', 5: 'Blue', 10: 'Green', 20: 'Black', 50: 'White'}
 
 class Card:
 
+    face_up = True
+
     def __init__(self, suit, rank):
         self.suit = suit
         self.rank = rank
         self.value = values[rank]
-        self.face_up = True
 
     def __str__(self):
         if self.face_up:
@@ -43,6 +44,12 @@ class Card:
             self.face_up = False
         else:
             self.face_up = True
+
+    def is_face_up(self):
+        if self.face_up:
+            return True
+        else:
+            return False
 
 
 class Deck:
@@ -67,10 +74,9 @@ class Chip:
 
     def __init__(self, value):
         self.value = value
-        self.color = chip_colors[value]
 
     def __str__(self):
-        return f'This chip is {self.color} with a value of {self.value}'
+        return f'This chip has a value of {self.value}'
 
 
 class Hand:
@@ -83,8 +89,8 @@ class Hand:
 
     def print_hand(self):
         str_hand = []
-        for card in self.cards:
-            str_hand.append(str(card))
+        for card_obj in self.cards:
+            str_hand.append(str(card_obj))
         return str_hand
 
     def value(self):
@@ -106,25 +112,28 @@ class Hand:
         else:
             return total
 
+    def add_cards(self, cards):
+        if type(cards) == type([]):
+            self.cards.extend(cards)
+        else:
+            self.cards.append(cards)
+
 
 class Player:
     # Player has bankroll and hand, and bankroll has a total value equal to adding up all chips
     def __init__(self):
         self.bankroll = []
-        self.total_cash = len(self.bankroll)
         self.hand = Hand()
         # Give the player 20 chips to play with
-        while self.total_cash < 20:
+        while len(self.bankroll) < 20:
             self.bankroll.append(Chip(1))
+        self.total_cash = len(self.bankroll)
 
     def __str__(self):
         return f'Money remaining: {self.total_cash}'
 
     def deal_cards(self, cards):
-        if type(cards) == type([]):
-            self.hand.extend(cards)
-        else:
-            self.hand.append(cards)
+        self.hand.add_cards(cards)
 
     def bet_chip(self):
         return self.bankroll.pop(0)
@@ -138,17 +147,18 @@ class Pot:
     def __str__(self):
         return f'The value of the pot is: {self.value()}'
 
-    def bet(self, number):
-
-        for i in range(number):
-            self.chips.append(player.bet_chip())
+    def bet(self, chip):
+        if type(chip) == type([]):
+            self.chips.extend(chip)
+        else:
+            self.chips.append(chip)
 
     def payout(self):
         return self.chips
 
     def value(self):
         total = 0
-        for i in self.chips:
+        for chip in self.chips:
             total += 1
         return total
 
@@ -172,7 +182,7 @@ def deal_cards():
     # Deal one face-up and one face-down card to dealer
     dealer.deal_cards([main_deck.remove_card(), main_deck.remove_card().flip])
     # Print the cards on the field for the player
-    print(f'The dealer is showing {dealer.hand.cards[0]}')
+    print(f'The dealer is showing {str(dealer.hand.cards[0])}')
     print(f'You have {player.hand.print_hand()}')
 
 
@@ -200,7 +210,7 @@ def play_again():
 
 while game_on:
 
-    if pot.value():  # Make sure not a push with a full pot
+    if not pot.value():  # Make sure not a push with a full pot
         if player.total_cash > 0:  # Make sure a player has enough money to bet
             bet = int(input("Please enter how many chips you would like to bet: "))
             if bet < player.total_cash:
