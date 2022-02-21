@@ -30,6 +30,19 @@ class Card:
         self.suit = suit
         self.rank = rank
         self.value = values[rank]
+        self.face_up = True
+
+    def __str__(self):
+        if self.face_up:
+            return f'The {self.rank} of {self.suit}.'
+        else:
+            pass
+
+    def flip(self):
+        if self.face_up:
+            self.face_up = False
+        else:
+            self.face_up = True
 
 
 class Deck:
@@ -66,7 +79,13 @@ class Hand:
         self.cards = []
 
     def __str__(self):
-        return f'The current cards in your hand are: {self.cards}'
+        return f'The current number of cards in your hand are: {len(self.cards)}'
+
+    def print_hand(self):
+        str_hand = []
+        for card in self.cards:
+            str_hand.append(str(card))
+        return str_hand
 
 
 class Player:
@@ -82,11 +101,50 @@ class Player:
     def __str__(self):
         return f'Money remaining: {self.total_value}'
 
+    def deal_cards(self, cards):
+        if type(cards) == type([]):
+            self.hand.extend(cards)
+        else:
+            self.hand.append(cards)
+
+
+class Pot:
+
+    def __init__(self):
+        self.chips = []
+        total = 0
+        for i in chips:
+            total += 1
+        self.value = total
+
+    def __str__(self):
+        return f'The value of the pot is: {self.value}'
+
 
 # Set up game
 game_on = True
 main_deck = Deck()
 main_deck.shuffle()
 player = Player()
+dealer = Player()
+pot = Pot()
 
+
+def deal_cards():
+    # Deal two face-up cards to player
+    player.deal_cards([main_deck.remove_card(), main_deck.remove_card()])
+    # Deal one face-up and one face-down card to dealer
+    dealer.deal_cards([main_deck.remove_card(), main_deck.remove_card().flip])
+    # Print the cards on the field for the player
+    print(f'The dealer is showing {dealer.hand.cards[0]}')
+    print(f'You have {player.hand.print_hand()}')
+
+
+while game_on:
+
+    if player.total_value > 0:
+        pass
+    else:
+        print('Player is out of money! Game over.')
+        game_on = False
 
