@@ -67,7 +67,7 @@ class Deck:
 
     def shuffle(self):
 
-        return random.shuffle(self.all_cards)
+        random.shuffle(self.all_cards)
 
 
 class Chip:
@@ -81,10 +81,12 @@ class Chip:
 
 class Hand:
 
-    total = 0
+    total_value = 0
 
     def __init__(self):
         self.cards = []
+        self.aces_list = []
+        self.eleven_aces = 0
 
     def __str__(self):
         return f'The current number of cards in your hand are: {len(self.cards)}'
@@ -95,24 +97,42 @@ class Hand:
             str_hand.append(str(card_obj))
         return str_hand
 
+    def count_aces(self):
+        """
+        returns all aces in hand
+        """
+        for c in self.cards:
+            if c.rank == 'Ace':
+                self.aces_list.append(c)
+        return self.aces_list
+
+    def count_eleven_aces(self):
+        """
+        Return how many aces in a hand are worth 11 points
+        """
+        for ace in self.aces_list:
+            if ace.value == 11:
+                self.eleven_aces += 1
+            else:
+                continue
+        return self.eleven_aces
+
     def value(self):
         # Find total points value for hand
-        self.total = 0
-        has_ace = False
         for card in self.cards:
-            if card.rank == 'Ace':  # Determine if player has Ace in their hand
-                if self.total + 11 > 21:
-                    self.total += 1
-                    has_ace = True
-                else:
-                    self.total += 11
-                    has_ace = True
-            else:
-                self.total += card.value
-        if self.total > 21 and has_ace:
-            return self.total - 10
-        else:
-            return self.total
+            self.total_value += card.value
+
+        if self.total_value > 21 and self.count_eleven_aces() > 0:
+            for ace in self.aces_list:
+                if ace.value == 11:
+                    self.total_value -= 10
+                    ace.value = 1
+                    if self.total_value <= 21:
+                        break
+                    else:
+                        continue
+
+        return self.total_value
 
     def add_cards(self, cards):
         if type(cards) == type([]):
@@ -232,7 +252,7 @@ def game_over(winner):
     player.hand.empty()
     main_deck = Deck()
 
-    
+
 while game_on:
 
     if not pot.value():  # Make sure not a push with a full pot
