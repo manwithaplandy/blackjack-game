@@ -120,6 +120,9 @@ class Hand:
         else:
             self.cards.append(cards)
 
+    def empty(self):
+        self.cards = []
+
 
 class Player:
     # Player has bankroll and hand, and bankroll has a total value equal to adding up all chips
@@ -213,6 +216,23 @@ def play_again():
             print('Invalid input. Please enter only "Y" or "N"')
 
 
+def game_over(winner):
+    """
+    Pay the winner if it's the player; reset all other game values. Empty player hand and pot, refill & reshuffle deck.
+    """
+    global game_on
+    global dealer_turn
+    global main_deck
+    if winner == player:
+        player.bankroll.extend(pot.payout())
+    else:
+        pot.empty()
+    game_on = play_again()
+    dealer_turn = False
+    player.hand.empty()
+    main_deck = Deck()
+
+    
 while game_on:
 
     if not pot.value():  # Make sure not a push with a full pot
@@ -229,7 +249,7 @@ while game_on:
                 print("You don't have enough chips for that bet! Please only bet money you have.")
         else:
             print('Player is out of money! Game over.')
-            game_on = False
+            game_over(dealer)
             break
     else:
         print(f'Pot currently has {pot.value()}')
@@ -256,8 +276,7 @@ while game_on:
                 continue
             else:
                 print('Bust! You lose')
-                pot.empty()
-                game_on = play_again()
+                game_over(dealer)
                 break
 
     while dealer_turn:
@@ -266,21 +285,15 @@ while game_on:
             dealer.hand.print_hand()
         if dealer.hand.value() > 21:
             print('Dealer bust! Player wins!')
-            player.bankroll.extend(pot.payout())
-            game_on = play_again()
-            dealer_turn = False
+            game_over(player)
             break
         elif dealer.hand.value() > player.hand.value():
             print(f'Dealer {dealer.hand.value()} beats Player {player.hand.value()}. Dealer wins!')
-            pot.empty()
-            game_on = play_again()
-            dealer_turn = False
+            game_over(dealer)
             break
         elif dealer.hand.value() < player.hand.value():
             print(f'Player {player.hand.value()} beats Dealer {dealer.hand.value()}. Player wins!')
-            player.bankroll.extend(pot.payout())
-            game_on = play_again()
-            dealer_turn = False
+            game_over(player)
             break
         elif dealer.hand.value() == player.hand.value():
             print(f'Push! Player and dealer tie')
