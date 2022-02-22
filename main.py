@@ -66,7 +66,7 @@ class Chips:
         self.bet = 0
 
     def __str__(self):
-        return f'You currently have {self.total}'
+        return f'Current chips balance: {self.total}'
 
     def win_bet(self):
         self.total += self.bet
@@ -85,16 +85,24 @@ class Hand:
         self.aces = 0
 
     def __str__(self):
-        return f'The current number of cards in your hand are: {len(self.cards)}'
+        _hand = ''
+        for card in self.cards:
+            _hand += ' ' + card
+        return _hand
 
-    def add_cards(self, card):
+    def add_card(self, card):
+        """
+        Add a single card to the hand. If the card is an Ace, add it to the Ace count.
+        """
         self.cards.append(card)
         self.value += values[card.rank]
         if card.rank == 'Ace':  # Count aces
             self.aces += 1
 
     def adjust_for_ace(self):
-
+        """
+        If user has at least one ace and hand value goes over 21, reduce hand value by 10 (ace goes from 11 -> 1)
+        """
         while self.value > 21 and self.aces:
             self.value -= 10
             self.aces -= 1
@@ -102,12 +110,32 @@ class Hand:
 
 # Set up game
 game_on = True
-main_deck = Deck()
-main_deck.shuffle()
+deck = Deck()
+deck.shuffle()
 player_hand = Hand()
 dealer_hand = Hand()
 bankroll = Chips()
 
 
 while game_on:
+    """
+    Game logic
+    """
+
+    # First, deal cards to player and dealer
+    for i in [1, 2]:
+        player_hand.add_card(deck.remove_card())
+        dealer_hand.add_card(deck.remove_card())
+
+    # Tell the player what their cards are and what the dealer's face-up card is
+    print(f"You are showing {str(player_hand)} for a total of {player_hand.value}")
+    print(f"The dealer is showing {str(dealer_hand[1])}")
+
+    # Prompt player for a bet
+    print(bankroll)
+    bankroll.bet = int(input("Please select an amount to wager: "))
+
+
+
+
 
