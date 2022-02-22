@@ -182,7 +182,8 @@ while game_on:
             player_hand.add_card(deck.remove_card())
             print(f"You have pulled the {str(player_hand.cards[-1])}. Your hand is now worth {player_hand.value}")
             if player_hand.value > 21:
-                print(f"Bust! You lose!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: {player_hand.value}")
+                print(f"Bust! You lose!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: "
+                      f"{player_hand.value}")
                 player_turn = False
                 game_on = play_again()
                 bankroll.lose_bet()
@@ -199,7 +200,8 @@ while game_on:
             dealer_hand.add_card(deck.remove_card())
             print(f"Dealer has pulled the {str(dealer_hand.cards[-1])}. Their hand is now worth {dealer_hand.value}")
         if dealer_hand.value > 21:
-            print(f"Dealer busts! Player Wins!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: {player_hand.value}")
+            print(f"Dealer busts! Player Wins!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: "
+                  f"{player_hand.value}")
             print(f"Player wins {2*bankroll.bet}.\nPlayer now has {bankroll.total+bankroll.bet}")
             dealer_turn = False
             bankroll.win_bet()
@@ -217,14 +219,3 @@ while game_on:
             bankroll.win_bet()
             game_on = play_again()
             break
-
-
-
-
-
-
-
-
-
-
-
