@@ -85,8 +85,8 @@ class Hand:
 
     def __init__(self):
         self.cards = []
-        self.aces_list = []
-        self.eleven_aces = 0
+        self.value = 0
+        self.aces = 0
 
     def __str__(self):
         return f'The current number of cards in your hand are: {len(self.cards)}'
@@ -97,48 +97,12 @@ class Hand:
             str_hand.append(str(card_obj))
         return str_hand
 
-    def count_aces(self):
-        """
-        returns all aces in hand
-        """
-        for c in self.cards:
-            if c.rank == 'Ace':
-                self.aces_list.append(c)
-        return self.aces_list
+    def adjust_for_aces(self):
 
-    def count_eleven_aces(self):
-        """
-        Return how many aces in a hand are worth 11 points
-        """
-        for ace in self.aces_list:
-            if ace.value == 11:
-                self.eleven_aces += 1
-            else:
-                continue
-        return self.eleven_aces
 
-    def value(self):
-        # Find total points value for hand
-        for card in self.cards:
-            self.total_value += card.value
-
-        if self.total_value > 21 and self.count_eleven_aces() > 0:
-            for ace in self.aces_list:
-                if ace.value == 11:
-                    self.total_value -= 10
-                    ace.value = 1
-                    if self.total_value <= 21:
-                        break
-                    else:
-                        continue
-
-        return self.total_value
-
-    def add_cards(self, cards):
-        if type(cards) == type([]):
-            self.cards.extend(cards)
-        else:
-            self.cards.append(cards)
+    def add_card(self, card):
+        self.cards.append(card)
+        self.value += values[card.rank]
 
     def empty(self):
         self.cards = []
@@ -193,16 +157,6 @@ class Pot:
         self.chips = []
 
 
-# Set up game
-game_on = True
-main_deck = Deck()
-main_deck.shuffle()
-player = Player()
-dealer = Player()
-pot = Pot()
-dealer_turn = False
-
-
 def deal_cards():
     # Deal two face-up cards to player
     player.deal_cards([main_deck.remove_card(), main_deck.remove_card()])
@@ -251,14 +205,16 @@ def game_over(winner):
     dealer_turn = False
     player.hand.empty()
     main_deck = Deck()
+    if game_on:
+        make_bet()
+        deal_cards()
 
 
-while game_on:
-
+def make_bet():
     if not pot.value():  # Make sure not a push with a full pot
         if player.total_cash > 0:  # Make sure a player has enough money to bet
             bet = int(input("Please enter how many chips you would like to bet: "))
-            if bet < player.total_cash:
+            if bet <= player.total_cash:
                 dealer_bet = 0
                 for i in range(bet):  # Player bets chips from bankroll
                     pot.bet(player.bet_chip())
@@ -267,15 +223,28 @@ while game_on:
                     pot.bet(Chip(1))  # Dealer matches player bet in pot
             else:
                 print("You don't have enough chips for that bet! Please only bet money you have.")
+                make_bet()
         else:
             print('Player is out of money! Game over.')
             game_over(dealer)
-            break
     else:
         print(f'Pot currently has {pot.value()}')
 
-    # Deal initial hand
-    deal_cards()
+
+# Set up game
+game_on = True
+main_deck = Deck()
+main_deck.shuffle()
+player = Player()
+dealer = Player()
+pot = Pot()
+dealer_turn = False
+# Make bets and deal initial hand
+make_bet()
+deal_cards()
+
+
+while game_on:
 
     if player.hand.value == 21 and dealer.hand.value != 21:
         print(f'Player {player.hand.value()} beats Dealer {dealer.hand.value()}. Player wins!')
