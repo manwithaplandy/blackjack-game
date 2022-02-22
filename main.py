@@ -34,7 +34,7 @@ class Card:
         self.value = values[rank]
 
     def __str__(self):
-        return f'The {self.rank} of {self.suit}.'
+        return f'The {self.rank} of {self.suit}'
 
 
 class Deck:
@@ -87,7 +87,10 @@ class Hand:
     def __str__(self):
         _hand = ''
         for card in self.cards:
-            _hand += ' ' + card
+            if card == self.cards[0]:
+                _hand += str(card)
+            else:
+                _hand += ' and ' + str(card)
         return _hand
 
     def add_card(self, card):
@@ -121,10 +124,19 @@ def play_again():
     """
     Let the player decide if they would like to play another hand
     """
+
+    global player_hand  # Empty player and dealer hands if player wants to play again
+    global dealer_hand
+    global deck
+
     answer = ''
     while answer not in ['y', 'n']:  # Validate input
         answer = input("Would you like to play again? Y/N").lower()
         if answer == 'y':
+            player_hand = Hand()  # Empty hands, reset and shuffle deck
+            dealer_hand = Hand()
+            deck = Deck()
+            deck.shuffle()
             return True
         elif answer == 'n':
             return False
@@ -137,11 +149,16 @@ while game_on:
 
     # Prompt player for a bet
     print(bankroll)
-    bankroll.bet = int(input("Please select an amount to wager: "))
-    while bankroll.bet > bankroll.total:  # Make sure they're not betting more than they have
-        bankroll.bet = int(input(f"That's more than you have left! The number entered must be less than "
-                                 f"{str(bankroll)}.\n"
-                                 f"Please select an amount to wager"))
+    if bankroll.total > 0:
+        bankroll.bet = int(input("Please select an amount to wager: "))
+        while bankroll.bet > bankroll.total:  # Make sure they're not betting more than they have
+            bankroll.bet = int(input(f"That's more than you have left! The number entered must be less than "
+                                     f"{str(bankroll)}.\n"
+                                     f"Please select an amount to wager: "))
+    else:
+        print("You're out of chips! Get out of my casino ya bum!")
+        game_on = False
+        break
 
     # Deal cards to player and dealer
     for i in [1, 2]:
@@ -150,10 +167,12 @@ while game_on:
 
     # Tell the player what their cards are and what the dealer's face-up card is
     print(f"You are showing {str(player_hand)} for a total of {player_hand.value}")
-    print(f"The dealer is showing {str(dealer_hand[1])}")
+    print(f"The dealer is showing {str(dealer_hand.cards[1])}")
 
+    dealer_turn = False  # Will be true when player has finished hitting
     player_turn = True  # Time for the player to choose to hit or stay
-    while player_turn:
+
+    while player_turn:  # Player takes their turn
         action = input("Would you like to hit or stay? ").lower()
         while action not in ['hit', 'stay']:  # Check that they are entering valid command
             print("Invalid input. Please enter only the word 'hit' or 'stay'.")
@@ -161,12 +180,44 @@ while game_on:
 
         if action == 'hit':
             player_hand.add_card(deck.remove_card())
-            print(f"You have pulled the {player_hand[-1]}. Your hand is now worth {player_hand.value}")
+            print(f"You have pulled the {str(player_hand.cards[-1])}. Your hand is now worth {player_hand.value}")
             if player_hand.value > 21:
-                print("Bust! You lose!")
+                print(f"Bust! You lose!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: {player_hand.value}")
                 player_turn = False
                 game_on = play_again()
                 bankroll.lose_bet()
+            else:
+                continue
+        if action == 'stay':
+            print(f"You stay. Your hand is worth {player_hand.value}. Now dealer's turn.")
+            player_turn = False
+            dealer_turn = True
+            break
+
+    while dealer_turn:
+        while dealer_hand.value < 17:
+            dealer_hand.add_card(deck.remove_card())
+            print(f"Dealer has pulled the {str(dealer_hand.cards[-1])}. Their hand is now worth {dealer_hand.value}")
+        if dealer_hand.value > 21:
+            print(f"Dealer busts! Player Wins!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: {player_hand.value}")
+            print(f"Player wins {2*bankroll.bet}.\nPlayer now has {bankroll.total+bankroll.bet}")
+            dealer_turn = False
+            bankroll.win_bet()
+            game_on = play_again()
+            break
+        elif 21 > dealer_hand.value > player_hand.value:
+            print(f"Dealer wins!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: {player_hand.value}")
+            dealer_turn = False
+            bankroll.lose_bet()
+            game_on = play_again()
+            break
+        elif 21 > dealer_hand.value < player_hand.value:
+            print(f"Player wins!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: {player_hand.value}")
+            dealer_turn = False
+            bankroll.win_bet()
+            game_on = play_again()
+            break
+
 
 
 
