@@ -185,6 +185,7 @@ while game_on:
 
         if action == 'hit':
             player_hand.add_card(deck.remove_card())
+            player_hand.adjust_for_ace()
             print(f"You have pulled the {str(player_hand.cards[-1])}. Your hand is now worth {player_hand.value}")
             if player_hand.value > 21:
                 print(f"Bust! You lose!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: "
@@ -203,6 +204,7 @@ while game_on:
     while dealer_turn:
         while dealer_hand.value < 17:
             dealer_hand.add_card(deck.remove_card())
+            dealer_hand.adjust_for_ace()
             print(f"Dealer has pulled the {str(dealer_hand.cards[-1])}. Their hand is now worth {dealer_hand.value}")
         if dealer_hand.value > 21:
             print(f"Dealer busts! Player Wins!\nDealer hand total: {dealer_hand.value}\nPlayer hand total: "
