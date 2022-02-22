@@ -117,6 +117,19 @@ dealer_hand = Hand()
 bankroll = Chips()
 
 
+def play_again():
+    """
+    Let the player decide if they would like to play another hand
+    """
+    answer = ''
+    while answer not in ['y', 'n']:  # Validate input
+        answer = input("Would you like to play again? Y/N").lower()
+        if answer == 'y':
+            return True
+        elif answer == 'n':
+            return False
+
+
 while game_on:
     """
     Game logic
@@ -138,6 +151,22 @@ while game_on:
     # Tell the player what their cards are and what the dealer's face-up card is
     print(f"You are showing {str(player_hand)} for a total of {player_hand.value}")
     print(f"The dealer is showing {str(dealer_hand[1])}")
+
+    player_turn = True  # Time for the player to choose to hit or stay
+    while player_turn:
+        action = input("Would you like to hit or stay? ").lower()
+        while action not in ['hit', 'stay']:  # Check that they are entering valid command
+            print("Invalid input. Please enter only the word 'hit' or 'stay'.")
+            action = input("Would you like to hit or stay? ").lower()
+
+        if action == 'hit':
+            player_hand.add_card(deck.remove_card())
+            print(f"You have pulled the {player_hand[-1]}. Your hand is now worth {player_hand.value}")
+            if player_hand.value > 21:
+                print("Bust! You lose!")
+                player_turn = False
+                game_on = play_again()
+                bankroll.lose_bet()
 
 
 
