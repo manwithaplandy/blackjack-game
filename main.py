@@ -150,11 +150,16 @@ while game_on:
     # Prompt player for a bet
     print(bankroll)
     if bankroll.total > 0:
-        bankroll.bet = int(input("Please select an amount to wager: "))
-        while bankroll.bet > bankroll.total:  # Make sure they're not betting more than they have
-            bankroll.bet = int(input(f"That's more than you have left! The number entered must be less than "
-                                     f"{str(bankroll)}.\n"
-                                     f"Please select an amount to wager: "))
+        try:
+            bankroll.bet = int(input("Please select an amount to wager: "))
+        except ValueError:
+            print("Bet has to be an integer! What are you, a QA tester? I'm outta here!")
+            break
+        else:
+            while bankroll.bet > bankroll.total:  # Make sure they're not betting more than they have
+                bankroll.bet = int(input(f"That's more than you have left! The number entered must be less than "
+                                         f"{str(bankroll)}.\n"
+                                         f"Please select an amount to wager: "))
     else:
         print("You're out of chips! Get out of my casino ya bum!")
         game_on = False
