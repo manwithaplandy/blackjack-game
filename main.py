@@ -122,7 +122,15 @@ while game_on:
     Game logic
     """
 
-    # First, deal cards to player and dealer
+    # Prompt player for a bet
+    print(bankroll)
+    bankroll.bet = int(input("Please select an amount to wager: "))
+    while bankroll.bet > bankroll.total:  # Make sure they're not betting more than they have
+        bankroll.bet = int(input(f"That's more than you have left! The number entered must be less than "
+                                 f"{str(bankroll)}.\n"
+                                 f"Please select an amount to wager"))
+
+    # Deal cards to player and dealer
     for i in [1, 2]:
         player_hand.add_card(deck.remove_card())
         dealer_hand.add_card(deck.remove_card())
@@ -131,9 +139,10 @@ while game_on:
     print(f"You are showing {str(player_hand)} for a total of {player_hand.value}")
     print(f"The dealer is showing {str(dealer_hand[1])}")
 
-    # Prompt player for a bet
-    print(bankroll)
-    bankroll.bet = int(input("Please select an amount to wager: "))
+
+
+
+
 
 
 
