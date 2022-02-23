@@ -226,3 +226,11 @@ while game_on:
             bankroll.win_bet()
             game_on = play_again()
             break
+        elif dealer_hand.value == player_hand.value:
+            print("Push! Player and dealer tie.")
+            dealer_turn = False
+            player_hand = Hand()  # Empty hands, reset and shuffle deck
+            dealer_hand = Hand()
+            deck = Deck()
+            deck.shuffle()
+            break
