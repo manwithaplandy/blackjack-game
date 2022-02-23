@@ -139,6 +139,7 @@ def play_again():
             deck.shuffle()
             return True
         elif answer == 'n':
+            print("Thank you for playing!")
             return False
 
 
